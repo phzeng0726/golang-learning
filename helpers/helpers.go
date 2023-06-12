@@ -1,15 +1,24 @@
 package helpers
 
 import (
-	"math/rand"
-	"time"
+	"encoding/json"
+	"log"
 )
 
-func RandomNumber(n int) int {
-	// 獲取當前 Goroutine 的獨立種子
-	seed := time.Now().UnixNano()
-	rand.New(rand.NewSource(seed))
+type Person struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	HairColor string `json:"hair_color"`
+	HasDog    bool   `json:"has_dog"`
+}
 
-	randomNumber := rand.Intn(n)
-	return randomNumber
+func toJson(jsonStr string) []Person {
+	var results []Person
+
+	err := json.Unmarshal([]byte(jsonStr), &results)
+
+	if err != nil {
+		log.Println("Error", err)
+	}
+	return results
 }
