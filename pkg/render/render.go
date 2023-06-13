@@ -7,14 +7,14 @@ import (
 	"net/http"
 )
 
-func RenderTemplateTest(w http.ResponseWriter, tmpl string) {
-	parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.layout.tmpl")
-	err := parsedTemplate.Execute(w, nil)
-	if err != nil {
-		fmt.Println("Error occurs:", err)
-		return
-	}
-}
+// func RenderTemplateTest(w http.ResponseWriter, tmpl string) {
+// 	parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.layout.tmpl")
+// 	err := parsedTemplate.Execute(w, nil)
+// 	if err != nil {
+// 		fmt.Println("Error occurs:", err)
+// 		return
+// 	}
+// }
 
 var tc = make(map[string]*template.Template)
 
