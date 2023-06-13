@@ -1,27 +1,29 @@
 package main
 
 import (
+	"errors"
 	"log"
 )
 
 func main() {
-	myJson := `
-[
-    {
-        "first_name" : "Clark",
-        "last_name" : "Kent",
-        "hair_color" : "black",
-        "has_dog" : true
-    },
-    {
-        "first_name" : "RRA",
-        "last_name" : "AASQ",
-        "hair_color" : "blue",
-        "has_dog" : false
-    }
-]`
+	result, err := divide(100.0, 0.0)
 
-	results := helpers.toJson(myJson)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-	log.Println("Successed", results)
+	log.Println("result of division is", result)
+}
+
+func divide(x, y float32) (float32, error) {
+	var result float32
+
+	if y == 0 {
+		return result, errors.New("cannot divide by 0")
+	}
+
+	result = x / y
+
+	return result, nil
 }
