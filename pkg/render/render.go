@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"html/template"
 	"learning/pkg/config"
+	"learning/pkg/models"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -15,7 +16,12 @@ func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+// 所有page都要添加default data的時候就在這個function加
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 	var tc map[string]*template.Template
 
 	if app.UseCache {
@@ -29,9 +35,13 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	if !ok {
 		log.Fatal("Could not get template from template cache")
 	}
+
 	buf := new(bytes.Buffer)
 
-	_ = t.Execute(buf, nil)
+	td = AddDefaultData(td)
+
+	_ = t.Execute(buf, td)
+
 	_, err := buf.WriteTo(w)
 	if err != nil {
 		log.Println(err)

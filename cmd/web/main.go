@@ -22,12 +22,12 @@ func main() {
 	app.TemplateCache = tc
 	app.UseCache = false
 
-	repo := handlers.NewRepo(&app)
-	handlers.NewHandlers(repo)
-	render.NewTemplates(&app)
+	// repo := handlers.NewRepo(&app)
+	// handlers.NewHandlers(repo)
+	// render.NewTemplates(&app) // 傳資料位置
 
-	// handlers.NewHandlers(&app)
-	// render.NewTemplates(&app)
+	handlers.NewHandlers(&app)
+	render.NewTemplates(&app)
 
 	http.HandleFunc("/", handlers.Repo.Home)
 	http.HandleFunc("/about", handlers.Repo.About)
