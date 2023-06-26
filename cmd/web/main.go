@@ -7,12 +7,29 @@ import (
 	"learning/pkg/render"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/alexedwards/scs/v2"
 )
 
 const portNumber = ":8080"
 
+// move to outside because the NoSurf function used this variable
+var app config.AppConfig
+var session *scs.SessionManager
+
 func main() {
-	var app config.AppConfig
+
+	// change this value to true when the env is production
+	app.InProduction = false
+
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = false
+
+	app.Session = session
 
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
@@ -22,16 +39,16 @@ func main() {
 	app.TemplateCache = tc
 	app.UseCache = false
 
-	// repo := handlers.NewRepo(&app)
-	// handlers.NewHandlers(repo)
-	// render.NewTemplates(&app) // 傳資料位置
-
 	handlers.NewHandlers(&app)
 	render.NewTemplates(&app)
 
-	http.HandleFunc("/", handlers.Repo.Home)
-	http.HandleFunc("/about", handlers.Repo.About)
-
 	fmt.Printf("Server port number: %s", portNumber)
-	_ = http.ListenAndServe(portNumber, nil)
+
+	srv := &http.Server{
+		Addr:    portNumber,
+		Handler: routes(&app),
+	}
+
+	err = srv.ListenAndServe()
+	log.Fatal(err)
 }
