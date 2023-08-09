@@ -1,129 +1,118 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
-type book struct {
-	ID       string `json:"id"`
-	Title    string `json:"title"`
-	Author   string `json:"author"`
-	Quantity int    `json:"quantity"`
+// 使用 Go 的 net/http 庫，建立一個簡單的 RESTful API，能夠處理用戶的 CRUD（新增、讀取、更新和刪除）請求。
+
+type User struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
 }
 
-var books = []book{
-	{ID: "1", Title: "In Search of Lost Time", Author: "Rita", Quantity: 2},
-	{ID: "2", Title: "In Search of Lost Time 2", Author: "Rita", Quantity: 2},
-	{ID: "3", Title: "In Search of Lost Time 3", Author: "Rita", Quantity: 2},
+var users = []User{
+	{ID: "1", Name: "Rita", Age: 26},
+	{ID: "2", Name: "Yong", Age: 27},
+	{ID: "3", Name: "Mona", Age: 23},
 }
 
-func getBooks(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, books)
+func createUser(w http.ResponseWriter, r *http.Request) {
+	var newUser User
+
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	users = append(users, newUser)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
 }
 
-func bookById(id string) (*book, error) {
-	for i, b := range books {
-		if b.ID == id {
-			return &books[i], nil
+func getUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
+
+func updateUser(w http.ResponseWriter, r *http.Request) {
+	var updateUser User
+	var updated bool
+
+	err := json.NewDecoder(r.Body).Decode(&updateUser)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	for i, u := range users {
+		if updateUser.ID == u.ID {
+			users[i] = updateUser
+			updated = true
+			break
 		}
 	}
 
-	return nil, errors.New("book not found")
+	if !updated {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
 }
 
-func getBookById(c *gin.Context) {
-	id := c.Param("id")
-	book, err := bookById(id)
+func deleteUser(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "Missing id query parameter", http.StatusBadRequest)
+		return
+	}
+
+	i, err := getUserIndexById(id)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Book not found"})
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	c.IndentedJSON(http.StatusOK, book)
+
+	users = append(users[:i], users[i+1:]...)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
 }
 
-func createBook(c *gin.Context) {
-	var newBook book
-
-	if err := c.BindJSON(&newBook); err != nil {
-		return
-	}
-
-	books = append(books, newBook)
-	c.IndentedJSON(http.StatusCreated, books)
-}
-
-// 還書
-func returnBook(c *gin.Context) {
-	id, ok := c.GetQuery("id")
-	if !ok {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Missing id query parameter"})
-		return
-	}
-	book, err := bookById(id)
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Book not found"})
-		return
-	}
-
-	book.Quantity += 1
-
-	c.IndentedJSON(http.StatusOK, book)
-}
-
-// 借書
-func checkoutBook(c *gin.Context) {
-	id, ok := c.GetQuery("id")
-	if !ok {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Missing id query parameter"})
-		return
-	}
-	book, err := bookById(id)
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Book not found"})
-		return
-	}
-
-	if book.Quantity <= 0 {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Book not available"})
-		return
-	}
-
-	book.Quantity -= 1
-	c.IndentedJSON(http.StatusOK, book)
-}
-
-func removeById(bs []book, id string) []book {
-	for i, b := range bs {
-		if b.ID == id {
-			return append(bs[:i], bs[i+1:]...)
+func getUserIndexById(id string) (int, error) {
+	for i, u := range users {
+		if u.ID == id {
+			return i, nil
 		}
 	}
-	return nil
+
+	return -1, errors.New("User not found")
 }
 
-func deleteBookById(c *gin.Context) {
-	id := c.Param("id")
-	book, err := bookById(id)
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Book not found"})
-		return
+func userHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		getUsers(w, r)
+	case http.MethodPost:
+		createUser(w, r)
+	case http.MethodPut:
+		updateUser(w, r)
+	case http.MethodDelete:
+		deleteUser(w, r)
 	}
-
-	books = removeById(books, book.ID)
-	c.IndentedJSON(http.StatusOK, books)
 }
 
 func main() {
-	router := gin.Default()
-	router.GET("/books", getBooks)
-	router.GET("/book/:id", getBookById)
-	router.POST("/books", createBook)
-	router.PATCH("/checkout", checkoutBook)
-	router.PATCH("/return", returnBook)
-	router.DELETE("/book/:id", deleteBookById)
+	http.HandleFunc("/users", userHandler)
 
-	router.Run("localhost:8080")
+	port := "8080"
+	fmt.Printf("Listening on port %s...\n", port)
+	http.ListenAndServe(":"+port, nil)
 }

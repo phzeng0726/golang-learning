@@ -1,69 +1,54 @@
 package main
 
-import (
-	"fmt"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
-type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-}
-
-var users = []User{
-	User{ID: 1, Name: "Rita", Age: 26},
-	User{ID: 2, Name: "Yong", Age: 27},
-	User{ID: 3, Name: "Mona", Age: 23},
-}
-
-// C
-func createUser(c *gin.Context) {
-	var newUser User
-
-	if err := c.BindJSON(&newUser); err != nil {
-		return
-	}
-
-	users = append(users, newUser)
-	c.IndentedJSON(http.StatusCreated, users)
-}
-
-// R
-func getUsers(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, users)
-}
-
-// U
-// TODO error handling
-func updateUser(c *gin.Context) {
-	var updateUser User
-
-	if err := c.BindJSON(&updateUser); err != nil {
-		return
-	}
-
-	for i, u := range users {
-		if updateUser.ID == u.ID {
-			users = append(users[:i], users[i+1:]...)
-			users = append(users, updateUser)
-		}
-	}
-
-	c.IndentedJSON(http.StatusCreated, users)
-}
-
-// D
+import "fmt"
 
 func main() {
-	router := gin.Default()
-	router.GET("/users", getUsers)
-	router.POST("/users", createUser)
-	router.PATCH("/users", updateUser)
+	// util_01
+	// 1
+	questions.Sum(12, 30)
+	// 2
+	data := []int{1, 2, 3, 4, 5}
+	questions.FindMaxAndMin(data)
+	// 3
+	car01 := questions.Car{Brand: "Nissan", Category: "c750"}
+	car01.Introduce()
+	// 4
+	questions.ReverseStr("Hot dog")
 
-	port := "8080"
-	fmt.Printf("Listening on port %s...\n", port)
-	router.Run(":" + port)
+	// util_02
+	// 1
+	questions.FindEven(10)
+	// 2
+	rectangle01 := questions.Rectangle{Length: -10, Width: 20}
+	fmt.Println(rectangle01.Area())
+	// 3
+	strSlice := []string{"pipi", "mina", "omicorn"}
+	fmt.Println(questions.SumStrLen(strSlice))
+
+	// util_03
+	// 01
+	fmt.Println(questions.SumN(3))
+	// 02
+	triangle := questions.Triangle{SideA: 10, SideB: 10, SideC: 10}
+	fmt.Println(triangle.JudgeEqual())
+	// 03
+	fmt.Println(questions.JudgePalindrome("iui"))
+
+	// util_04
+	// 01
+	fmt.Println(questions.Factorial(3))
+	// 02
+	cylinder := questions.Cylinder{Radius: 10, Height: 10}
+	fmt.Println(cylinder.Volume())
+	// 03
+	fmt.Println(questions.Fibonacci(40))
+
+	// util_05
+	// 01
+	fmt.Println(questions.FindPrime(21))
+	// 02
+	employee := questions.Employee{Name: "Rita", Age: 93}
+	fmt.Println(employee.JudgeRetire())
+	// 03
+	fmt.Println(questions.CountVowel("Rita"))
 }
