@@ -5,21 +5,58 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 )
 
-// 使用 Go 的標準庫，建立一個簡單的 JSON API，能夠存取和操作一個待辦事項清單。
-
+// 1. 使用 Go 的標準庫，建立一個簡單的 JSON API，能夠存取和操作一個待辦事項清單。
+// 2. 創建一個簡單的 To-Do 應用，使用檔案儲存任務清單，能夠新增、刪除和列印任務。
 type Task struct {
 	Id     string `json:"id"`
 	Title  string `json:"title"`
 	IsDone bool   `json:"isDone"`
 }
 
-var tasks = []Task{
-	{Id: "1", Title: "1 task", IsDone: false},
-	{Id: "2", Title: "2 task", IsDone: false},
-	{Id: "3", Title: "3 task", IsDone: false},
-	{Id: "4", Title: "4 task", IsDone: false},
+var tasks []Task
+var taskFilePath string = "./data/tasks.json"
+
+func readTaskJson() error {
+	filePtr, err := os.Open(taskFilePath)
+	if err != nil {
+		fmt.Println("Cannot open tasks.json")
+		return err
+	}
+	defer filePtr.Close()
+
+	err = json.NewDecoder(filePtr).Decode(&tasks)
+
+	if err != nil {
+		fmt.Println("Decode json failed", err.Error())
+	} else {
+		fmt.Println("Decode json succeed")
+		fmt.Println(tasks)
+	}
+
+	return err
+}
+
+func editTaskJson() error {
+	filePtr, err := os.Create(taskFilePath)
+	if err != nil {
+		fmt.Println("Cannot open tasks.json")
+		return err
+	}
+	defer filePtr.Close()
+
+	err = json.NewEncoder(filePtr).Encode(&tasks)
+
+	if err != nil {
+		fmt.Println("Encode json failed", err.Error())
+	} else {
+		fmt.Println("Encode json succeed")
+		fmt.Println(tasks)
+	}
+
+	return err
 }
 
 func getTasks(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +77,7 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tasks)
+	editTaskJson()
 }
 
 func getTaskIndexById(id string) (int, error) {
@@ -72,6 +110,7 @@ func updateTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tasks)
+	editTaskJson()
 }
 
 func deleteTask(w http.ResponseWriter, r *http.Request) {
@@ -92,22 +131,29 @@ func deleteTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tasks)
+	editTaskJson()
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		getTasks(w, r)
+		return
 	case http.MethodPost:
 		createTask(w, r)
+		return
 	case http.MethodPatch:
 		updateTask(w, r)
+		return
 	case http.MethodDelete:
 		deleteTask(w, r)
+		return
 	}
 }
 
 func main() {
+	readTaskJson()
+
 	http.HandleFunc("/tasks", taskHandler)
 
 	port := "8080"
