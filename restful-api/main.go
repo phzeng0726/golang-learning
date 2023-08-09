@@ -102,7 +102,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 		getUsers(w, r)
 	case http.MethodPost:
 		createUser(w, r)
-	case http.MethodPut:
+	case http.MethodPatch:
 		updateUser(w, r)
 	case http.MethodDelete:
 		deleteUser(w, r)
