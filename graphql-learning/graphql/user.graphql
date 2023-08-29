@@ -1,0 +1,7 @@
+input NewUserInput {
+  name: String!
+  email: String!
+  location: String!
+  language: String!
+  joinDate: Date!
+}

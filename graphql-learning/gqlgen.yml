@@ -1,0 +1,23 @@
+schema:
+  - graphql/*.graphql
+
+exec:
+  filename: autogen/generated.go
+  package: autogen
+
+federation:
+  filename: autogen/federation.go
+  package: autogen
+
+model:
+  filename: autogen/gen_models.go
+  package: autogen
+
+# Optional: turn on to use []Thing instead of []*Thing
+omit_slice_element_pointers: true
+
+models:
+  Int64:
+    model: "github.com/99designs/gqlgen/graphql.Int64"
+  Date:
+    model: "graphql-learning/scalars.Date"

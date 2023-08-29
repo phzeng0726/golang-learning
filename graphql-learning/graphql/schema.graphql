@@ -1,0 +1,10 @@
+scalar Date
+scalar Time
+
+type Query {
+  version: String!
+}
+
+type Mutation {
+  createUser(input: NewUserInput!): String
+}
