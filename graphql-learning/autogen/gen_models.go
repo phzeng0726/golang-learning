@@ -3,13 +3,66 @@
 package autogen
 
 import (
-	"time"
+	"fmt"
+	"io"
+	"strconv"
 )
 
+type AppendPurchaseInput struct {
+	UserID    string                 `json:"userId"`
+	Purchases []NewUserPurchaseInput `json:"purchases,omitempty"`
+}
+
 type NewUserInput struct {
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Location string    `json:"location"`
-	Language string    `json:"language"`
-	JoinDate time.Time `json:"joinDate"`
+	Name      string                 `json:"name"`
+	Email     string                 `json:"email"`
+	Purchases []NewUserPurchaseInput `json:"purchases,omitempty"`
+}
+
+type NewUserPurchaseInput struct {
+	MenuID   int64 `json:"menuId"`
+	Quantity int   `json:"quantity"`
+}
+
+type MenuCategory string
+
+const (
+	MenuCategoryCake     MenuCategory = "CAKE"
+	MenuCategoryIceCream MenuCategory = "ICE_CREAM"
+	MenuCategoryDrinks   MenuCategory = "DRINKS"
+)
+
+var AllMenuCategory = []MenuCategory{
+	MenuCategoryCake,
+	MenuCategoryIceCream,
+	MenuCategoryDrinks,
+}
+
+func (e MenuCategory) IsValid() bool {
+	switch e {
+	case MenuCategoryCake, MenuCategoryIceCream, MenuCategoryDrinks:
+		return true
+	}
+	return false
+}
+
+func (e MenuCategory) String() string {
+	return string(e)
+}
+
+func (e *MenuCategory) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = MenuCategory(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid MenuCategory", str)
+	}
+	return nil
+}
+
+func (e MenuCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

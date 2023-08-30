@@ -1,0 +1,12 @@
+type Menu @goModel(model: "graphql-learning/orm.Menu") {
+  id: Int64!
+  category: String!
+  name: String!
+  price: Int!
+}
+
+enum MenuCategory {
+  CAKE
+  ICE_CREAM
+  DRINKS
+}

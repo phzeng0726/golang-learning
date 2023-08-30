@@ -1,7 +1,31 @@
+input AppendPurchaseInput {
+  userId: String!
+  purchases: [NewUserPurchaseInput!]
+}
+
 input NewUserInput {
   name: String!
   email: String!
-  location: String!
-  language: String!
-  joinDate: Date!
+  purchases: [NewUserPurchaseInput!]
+}
+
+input NewUserPurchaseInput {
+  menuId: Int64!
+  quantity: Int!
+}
+
+type UserData @goModel(model: "graphql-learning/orm.UserData") {
+  userId: String!
+  name: String!
+  email: String!
+  totalPrice: Int!
+  purchases: [UserPurchaseData!]
+}
+
+type UserPurchaseData @goModel(model: "graphql-learning/orm.UserPurchaseData") {
+  category: String!
+  name: String!
+  price: Int!
+  quantity: Int!
+  subTotal: Int!
 }
