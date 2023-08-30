@@ -38,7 +38,7 @@ func main() {
 				}
 				next.ServeHTTP(w, r)
 			})
-		}(playground.Handler(programName, "/graphql")))
+		}(playground.Handler("programName", "/graphql")))
 	}
 
 	var dial string
@@ -93,11 +93,11 @@ func main() {
 
 	mux.Handle("/graphql", func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// // x-api-key
-			// if !disableAuth && r.Header.Get(keyXApiKey) != apiKey {
-			// 	http.Error(w, "403 forbidden", http.StatusForbidden)
-			// 	return
-			// }
+			// x-api-key
+			if !disableAuth && r.Header.Get(keyXApiKey) != apiKey {
+				http.Error(w, "403 forbidden", http.StatusForbidden)
+				return
+			}
 			// x-api-auth
 			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), resolvers.ContextKeyAuth,
 				r.Header.Get(keyXApiAuth))))

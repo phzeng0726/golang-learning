@@ -66,11 +66,13 @@ func init() {
 	// dbName = os.Getenv(keyDBName)
 	// dbPass = os.Getenv(keyDBPass)
 	// dbUser = os.Getenv(keyDBUser)
+	// disableAuth, _ = strconv.ParseBool(os.Getenv(keyDisableAuth))
+	// enablePlayground, _ = strconv.ParseBool(os.Getenv(keyEnablePlayground))
 	dbName = "graphql"
 	dbPass = "0000"
 	dbUser = "root"
-	disableAuth, _ = strconv.ParseBool(os.Getenv(keyDisableAuth))
-	enablePlayground, _ = strconv.ParseBool(os.Getenv(keyEnablePlayground))
+	disableAuth = true
+	enablePlayground = true
 	instanceConnectionName = os.Getenv(keyInstanceConnectionName)
 	if logReduce, err := strconv.ParseBool(os.Getenv(keyLogReduce)); err == nil && logReduce {
 		logLevel = logger.Warn
