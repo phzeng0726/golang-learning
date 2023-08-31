@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	apiKey                    = "mJI42RoGMWDZPKuZIQOUQ4MaMErVXrzLi0pcR56i"
+	apiKey                    = ""
 	dbConnMaxIdleTime         = 3 * time.Minute
 	dbConnMaxLifetime         = 6 * time.Minute
 	dbDialTimeout             = "20s"
